@@ -21,6 +21,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 });
+document.addEventListener("DOMContentLoaded", function () {
+  const toggleButton = document.querySelector('[data-collapse-toggle="navbar-user"]');
+  const navbarMenu = document.getElementById("navbar-sticky");
+
+  toggleButton.addEventListener("click", function () {
+      // Toggle the "hidden" class to show/hide the navbar
+      navbarMenu.classList.toggle("hidden");
+  });
+});
 const user_img = document.getElementById("user_img");
 const user_mail = document.getElementById("useremailhtml");
 const user_name = document.getElementById("usernamehtml");
@@ -62,71 +71,55 @@ function getUserInfo(uid) {
   getDoc(userRef)
     .then((data) => {
       const userData = data.data();
+      console.log(userData);
+      
       user_img.src = userData.img;
       user_mail.textContent = userData.email;
-      user_name.textContent = `${userData.firstname} ${userData.lastname}`;
+      user_name.textContent = userData.username
     })
     .catch((error) => {
       console.error("Error fetching user data: ", error);
     });
 }
-
 async function getallevents() {
   try {
     const querySnapshot = await getDocs(collection(db, "blogs"));
-    blog_container.innerHTML = "";
+    blog_container.innerHTML = ""; // Clear the container before adding new content
+
     querySnapshot.forEach((doc, index) => {
       const blog = doc.data();
       const { banner, title, description, createdByemail, date } = blog;
 
-      const card = `
-        <div class="group w-full max-lg:max-w-xl lg:w-1/3 border border-gray-300 rounded-2xl flex flex-col self-start h-96 overflow-scroll" id="card-${index}">
-
+      // Create the HTML content for each card
+      const cardHTML = `
+        <div class="group w-full max-lg:max-w-xl lg:w-1/3 border border-gray-300 rounded-2xl flex flex-col self-start h-96 overflow-scroll custom-scrollbar" id="card-${index}">
           <div class="flex items-center">
             <img src="${banner}" alt="blogs tailwind section" class="rounded-t-2xl w-full h-44">
           </div>
           <div class="p-4 lg:p-6 transition-all duration-300 rounded-b-2xl group-hover:bg-gray-50">
-            <span class="text-indigo-600 font-medium mb-3 block">${date}</span>
-            <span class="text-indigo-600 font-medium mb-3 block">${createdByemail}</span>
+            <span class="text-green-500 font-medium mb-3 block">${date}</span>
+            <span class="text-green-500 font-medium mb-3 block">${createdByemail}</span>
             <h4 class="text-xl text-gray-900 font-medium leading-8 mb-5">${title}</h4>
-    
-            <!-- Text that will be initially collapsed -->
-            <div class="description overflow-hidden max-h-20 text-gray-500 leading-6 transition-all duration-300 mb-10">
+            <!-- Text that will be scrollable -->
+            <div class="description overflow-scroll max-h-80 text-gray-500 leading-6 ">
               ${description}
             </div>
-    
-            <!-- "Read more" button -->
-            <a href="javascript:;" class="readMoreBtn cursor-pointer text-lg text-indigo-600 font-semibold">Read more..</a>
           </div>
-         
         </div>
       `;
 
-      blog_container.innerHTML += card;
+      // Append the card HTML to the blog container
+      blog_container.innerHTML += cardHTML;
 
-      // Select specific elements within the current card
-      const currentCard = document.querySelector(`#card-${index}`);
-      const descriptionDiv = currentCard.querySelector('.description');
-      const readMoreBtn = currentCard.querySelector('.readMoreBtn');
-
-      // Event listener for expanding/collapsing the specific blog
-      readMoreBtn.addEventListener('click', function () {
-        if (descriptionDiv.classList.contains('max-h-20')) {
-          descriptionDiv.classList.remove('max-h-20');
-          descriptionDiv.classList.add('max-h-full', 'overflow-auto');
-          readMoreBtn.textContent = 'Show less';
-        } else {
-          descriptionDiv.classList.add('max-h-20');
-          descriptionDiv.classList.remove('max-h-full', 'overflow-auto');
-          readMoreBtn.textContent = 'Read more..';
-        }
-      });
+      // Debugging: Check if card is appended and contains the expected ID
+      console.log(`Card ${index} HTML:`, cardHTML);
     });
-    ;
   } catch (err) {
     console.error("Error fetching events: ", err);
     alert(err);
   }
 }
+
+
 
 
